@@ -1,0 +1,11 @@
+# PortIOPay admin-dashboard CODEOWNERS
+# Requires 1 reviewer + code owner approval before merge
+
+* @platform-team
+
+# Merchant operations views — requires merchant-ops sign-off
+src/app/merchants/ @merchant-ops @platform-team
+
+# Security-sensitive configuration and auth
+src/lib/auth/ @security @platform-team
+src/app/settings/ @security @platform-team
