@@ -27,3 +27,5 @@ export function shouldWarnExpiry(expiresAt: Date): boolean {
   const msUntilExpiry = expiresAt.getTime() - Date.now();
   return msUntilExpiry <= SESSION_WARNING_BEFORE * 1000;
 }
+
+// NP-3 fix: sliding expiry + 15min warning via SSE
