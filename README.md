@@ -37,6 +37,10 @@ Deployed as a Next.js app on Vercel (internal SSO required).
 - **Production**: `admin.portioapay.internal`
 - **Staging**: `admin.staging.portioapay.internal`
 
+## Release History
+
+See [CHANGELOG.md](CHANGELOG.md) for notable changes by version.
+
 ## Ownership
 
 - Team: **PortIOPay Platform**
