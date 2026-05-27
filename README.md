@@ -12,6 +12,7 @@ Internal admin portal for **PortIOPay** merchant operations, platform configurat
 ## Table of contents
 
 - [Tech stack](#tech-stack)
+- [Architecture overview](#architecture-overview)
 - [Key features](#key-features)
 - [Project structure](#project-structure)
 - [Prerequisites](#prerequisites)
@@ -35,6 +36,23 @@ Internal admin portal for **PortIOPay** merchant operations, platform configurat
 | Data stores | PostgreSQL (`pg`), Redis (`ioredis`) |
 | Validation | Zod |
 | Logging | Pino |
+
+## Architecture overview
+
+```
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│  Internal SSO   │────▶│  Admin Dashboard │────▶│   PostgreSQL    │
+│  (NextAuth)     │     │  (Next.js 14)    │     │  (merchant data)│
+└─────────────────┘     └────────┬─────────┘     └─────────────────┘
+                                 │
+                                 ▼
+                        ┌──────────────────┐
+                        │      Redis       │
+                        │  (metrics cache) │
+                        └──────────────────┘
+```
+
+The dashboard is a server-rendered Next.js application. Authenticated operators access merchant configuration and platform metrics. Redis caches per-merchant metrics with event-driven invalidation when transaction state changes upstream.
 
 ## Key features
 
@@ -89,7 +107,6 @@ admin-dashboard/
 3. **Start Redis** (if not already running)
 
    ```bash
-   # Example: local Redis via Docker
    docker run -d --name portio-redis -p 6379:6379 redis:7-alpine
    ```
 
@@ -126,6 +143,15 @@ There is no committed `.env.example` in this repository; use `.env.local` for lo
 
 Additional provider-specific variables (OAuth client ID/secret, issuer URLs) depend on your NextAuth configuration in `src/lib/auth/options`.
 
+Example `.env.local` for local development:
+
+```bash
+REDIS_URL=redis://localhost:6379
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-local-dev-secret
+DATABASE_URL=postgresql://user:pass@localhost:5432/portio_admin
+```
+
 ## Application routes
 
 | Route | Access | Purpose |
@@ -145,6 +171,13 @@ Server components use `requireSession()` from `src/lib/auth/session.ts` to enfor
 ## Metrics cache
 
 `src/lib/metrics-cache.ts` stores per-merchant metrics in Redis with a 60-second TTL. When a transaction state changes, `onTransactionStateChange(merchantId)` invalidates the cache entry so the dashboard does not show stale numbers (NP-2030).
+
+Public API:
+
+- `getMerchantMetrics(merchantId)` — read cached metrics
+- `setMerchantMetrics(merchantId, metrics)` — write with TTL
+- `invalidateMerchantMetrics(merchantId)` — delete on state change
+- `onTransactionStateChange(merchantId)` — hook for upstream event consumers
 
 ## Testing and CI
 
@@ -171,6 +204,13 @@ The app is deployed as a **Next.js** application on **Vercel** with internal SSO
 | Staging | `https://admin.staging.portioapay.internal` |
 
 Set production environment variables in the Vercel project (or your deployment platform) to match [Environment variables](#environment-variables). Ensure `REDIS_URL` points at the environment-specific Redis cluster and that `NEXTAUTH_URL` matches the deployed hostname.
+
+### Deploy checklist
+
+1. Configure all required environment variables in Vercel project settings.
+2. Merge to `main` — Vercel auto-deploys production.
+3. Verify SSO login and dashboard metrics load correctly.
+4. Confirm Redis connectivity for metrics caching.
 
 ## Ownership
 
