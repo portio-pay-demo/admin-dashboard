@@ -17,18 +17,15 @@ Internal admin portal for PortIOPay merchant operations, platform configuration,
 
 ## Local Development
 
+See [docs/development.md](docs/development.md) for full setup, environment variables, and scripts.
+
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
 App runs on http://localhost:3000
-
-```bash
-cp .env.example .env.local
-docker compose up -d
-npm run dev
-```
 
 ## Deployment
 
