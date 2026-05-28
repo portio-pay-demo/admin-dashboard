@@ -68,6 +68,7 @@ The dashboard is a server-rendered Next.js application. Authenticated operators 
 
 ```
 admin-dashboard/
+├── .env.example               # Environment variable template
 ├── .github/workflows/ci.yml   # Lint, test, build on push/PR
 ├── CODEOWNERS                 # Review routing by path
 ├── src/
@@ -102,7 +103,11 @@ admin-dashboard/
 
 2. **Configure environment**
 
-   Create `.env.local` in the project root (see [Environment variables](#environment-variables)). At minimum, set `REDIS_URL` if Redis is not running on the default host.
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   Edit `.env.local` with your local credentials (see [Environment variables](#environment-variables)). At minimum, set `NEXTAUTH_SECRET` and `DATABASE_URL` for auth; adjust `REDIS_URL` if Redis is not on the default host.
 
 3. **Start Redis** (if not already running)
 
@@ -131,7 +136,7 @@ admin-dashboard/
 
 ## Environment variables
 
-There is no committed `.env.example` in this repository; use `.env.local` for local overrides (gitignored). Variables inferred from dependencies and application code:
+Copy `.env.example` to `.env.local` for local overrides (`.env.local` is gitignored). Variables used by the application:
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
@@ -143,14 +148,7 @@ There is no committed `.env.example` in this repository; use `.env.local` for lo
 
 Additional provider-specific variables (OAuth client ID/secret, issuer URLs) depend on your NextAuth configuration in `src/lib/auth/options`.
 
-Example `.env.local` for local development:
-
-```bash
-REDIS_URL=redis://localhost:6379
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-local-dev-secret
-DATABASE_URL=postgresql://user:pass@localhost:5432/portio_admin
-```
+See [`.env.example`](.env.example) for a full template with sensible local defaults.
 
 ## Application routes
 
